@@ -1,0 +1,90 @@
+﻿Exportfile for AOT version 1.0 or later
+Formatversion: 1
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: GitTest unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #GitTest
+    PROPERTIES
+      Name                #GitTest
+      Origin              #{A7C8B4E4-914D-45B5-85BA-D7F2F3A60839}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #classDeclaration
+        #public class GitTest
+        #{
+        #    //hello word
+        #}
+      ENDSOURCE
+      SOURCE #TestPullRequest
+        #public static void TestPullRequest()
+        #{
+        #    /*
+        #    //GithubSharp.Core.Models.GithubUser                                  cocytusUser;
+        #    //GithubSharp.Core.API.PullRequest                                    pullApi;
+        #    //GithubSharp.Plugins.LogProviders.NullLogger.NullLogger              logger;
+        #    //GithubSharp.Plugins.CacheProviders.NullCacher.NullCacher            cacher;
+        #
+        #    List                                                                pulls;// = new ClrObject("System.Collections.Generic.IEnumerable`1[GithubSharp.Core.API.PullRequest]");
+        #    CLRObject                                                           enumerator;
+        #    GithubSharp.Core.API.PullRequest                                    pull;
+        #
+        #
+        #
+        #    pulls = new List(Types::Class);
+        #
+        #    cocytusUser = new GithubSharp.Core.Models.GithubUser();
+        #    cacher = new GithubSharp.Plugins.CacheProviders.NullCacher.NullCacher();
+        #    logger = new GithubSharp.Plugins.LogProviders.NullLogger.NullLogger();
+        #    cocytusUser.set_Name("cocytus");
+        #    cocytusUser.set_APIToken("XXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+        #
+        #
+        #    pullApi = new GithubSharp.Core.API.PullRequest(cacher, logger);
+        #    pulls = pullApi.List("spdr870", "gitextensions");
+        #
+        #    enumerator = pulls.GetEnumerator();
+        #
+        #    while(enumerator.MoveNext())
+        #    {
+        #        pull = enumerator.get_Current();
+        #        //Console.WriteLine("Pull from {1}: {0}\r\nVotes: {2}\r\nBody: {3}\r\nGravatar ID: {4}", pull.Title, pull.User.Login, pull.Votes, pull.Body, pull.User.GravatarId);
+        #        //Console.WriteLine("Created: {0} Updated: {1} Issue updated: {2}", pull.Created, pull.Updated, pull.IssueUpdated);
+        #        //Console.WriteLine("Base: Owner: {0} Name: {1} Ref: {2} Sha: {3}", pull.Base.Repository.Owner, pull.Base.Repository.Name, pull.Base.Ref, pull.Base.Sha);
+        #        //Console.WriteLine("Head: Owner: {0} Name: {1} Ref: {2} Sha: {3}", pull.Head.Repository.Owner, pull.Head.Repository.Name, pull.Head.Ref, pull.Head.Sha);
+        #
+        #        //Console.WriteLine("Diff URL: {0}\r\nPatch: {1}", pull.DiffUrl, pull.PatchUrl);
+        #        //Console.WriteLine("Labels: {0}", string.Join(",", pull.Labels));
+        #        //Console.WriteLine("Position: {0} Number: {1}", pull.Position, pull.Number);
+        #    }
+        #
+        #                /*
+        #    var pull2 = pullApi.GetById("cocytus", "gitextensions", "1");
+        #    Console.WriteLine("Pull from {1}: {0}\r\nVotes: {2}\r\nBody: {3}\r\nGravatar ID: {4}", pull2.Title, pull2.User.Login, pull2.Votes, pull2.Body, pull2.User.GravatarId);
+        #    foreach (var d in pull2.Discussion)
+        #    {
+        #        Console.WriteLine("Discussion: From {0} At: {1} Type: {2}", d.User.Login, d.Created, d.Type);
+        #        if (d.Type.ToLowerInvariant() == "commit")
+        #        {
+        #            Console.WriteLine("SHA/ID: {0} Body: {1}", d.Id, d.Body);
+        #        }
+        #        else if (d.Type.ToLowerInvariant() == "issuecomment")
+        #        {
+        #            Console.WriteLine("Body: {0}", d.Body);
+        #        }
+        #        else
+        #            Console.WriteLine("WHAT? " + d.Type);
+        #    }
+        #                */
+        #
+        #
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: END

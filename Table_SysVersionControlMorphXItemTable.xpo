@@ -1,0 +1,377 @@
+﻿Exportfile for AOT version 1.0 or later
+Formatversion: 1
+
+***Element: DBT
+
+; Microsoft Dynamics AX Table : SysVersionControlMorphXItemTable unloaded
+; --------------------------------------------------------------------------------
+  TABLEVERSION 1
+  
+  TABLE #SysVersionControlMorphXItemTable
+    EnforceFKRelation 0
+    PROPERTIES
+      Name                #SysVersionControlMorphXItemTable
+      SecurityKey         #SysDevelopmentTables
+      MaxAccessMode       #NoAccess
+      Visible             #No
+      CacheLookup         #FoundAndEmpty
+      SaveDataPerCompany  #No
+      TableGroup          #Main
+      PrimaryIndex        #ItemPathIdx
+      ClusterIndex        #ItemPathIdx
+      DeveloperDocumentation  #@SYS123444
+      Origin              #{2C2009ED-0000-1000-A805-EAF069E6E903}
+      LegacyId            #2541
+    ENDPROPERTIES
+    
+    FIELDS
+      FIELD #ItemPath
+        STRING
+        PROPERTIES
+          Name                #ItemPath
+          Mandatory           #Yes
+          Table               #SysVersionControlMorphXItemTable
+          Origin              #{5A8D625F-D1AB-41E7-AD18-56234D577C1D}
+          LegacyId            #5
+          ExtendedDataType    #SysVersionControlItemPath
+          StringSize          #400
+        ENDPROPERTIES
+        
+    ENDFIELDS
+    GROUPS
+      GROUP #AutoReport
+        PROPERTIES
+          Name                #AutoReport
+        ENDPROPERTIES
+        
+        GROUPFIELDS
+          #ItemPath
+        ENDGROUPFIELDS
+      ENDGROUP
+    ENDGROUPS
+    
+    INDICES
+      #ItemPathIdx
+      PROPERTIES
+        Name                #ItemPathIdx
+        AllowDuplicates     #No
+        Origin              #{2B0B0001-09ED-1000-FC26-5FD162617468}
+        LegacyId            #1
+      ENDPROPERTIES
+      
+      INDEXFIELDS
+        #ItemPath
+      ENDINDEXFIELDS
+      
+    ENDINDICES
+    FULLTEXTINDICES
+    ENDFULLTEXTINDICES
+    REFERENCES
+    ENDREFERENCES
+    
+    DELETEACTIONS
+      #SysVersionControlMorphXRevisionTable
+      PROPERTIES
+        Table               #SysVersionControlMorphXRevisionTable
+        DeleteAction        #Cascade
+      ENDPROPERTIES
+      
+    ENDDELETEACTIONS
+    
+    METHODS
+      SOURCE #actionTextForCheckedOutItem
+        #/// <summary>
+        #///    Retrieves the action being performed on this item.
+        #/// </summary>
+        #/// <returns>
+        #///    The action being performed on this item.
+        #/// </returns>
+        #/// <remarks>
+        #///    An empty string is returned if the item is not checked out.
+        #/// </remarks>
+        #public SysVersionControlActionText actionTextForCheckedOutItem()
+        #{
+        #    return SysVersionControlMorphXLockTable::find(this.ItemPath).Action;
+        #}
+      ENDSOURCE
+      SOURCE #checkedOutTo
+        #/// <summary>
+        #///    Retrieves the ID of the user who has checked out this item.
+        #/// </summary>
+        #/// <returns>
+        #///    The ID of the user who the item is checked out to.
+        #/// </returns>
+        #/// <remarks>
+        #///    If the item is checked out by several users, only the ID of one of the users is returned. If the
+        #///    item is not checked out by anyone, an empty string is returned.
+        #/// </remarks>
+        #public userId checkedOutTo()
+        #{
+        #    return SysVersionControlMorphXLockTable::checkedOutTo(this.ItemPath);
+        #}
+      ENDSOURCE
+      SOURCE #checkIn
+        #/// <summary>
+        #///    Checks in the current item.
+        #/// </summary>
+        #/// <param name="_comment">
+        #///    The comment to use for the check-in.
+        #/// </param>
+        #/// <param name="_filename">
+        #///    The name of the file that contains the revision data; optional.
+        #/// </param>
+        #/// <remarks>
+        #///    The item is also unlocked.
+        #/// </remarks>
+        #public void checkIn(SysVersionControlItemComment _comment, Filename _filename = '')
+        #{
+        #    #SysVersionControl
+        #    SysVersionControlActionText actionText;
+        #
+        #    ttsbegin;
+        #
+        #    //
+        #    // Create the revision
+        #    //
+        #    actionText = this.actionTextForCheckedOutItem();
+        #    SysVersionControlMorphXRevisionTable::create(this.ItemPath, actionText, _comment, _filename);
+        #
+        #    //
+        #    // Remove the lock
+        #    //
+        #    SysVersionControlMorphXLockTable::remove(this.ItemPath);
+        #
+        #    ttscommit;
+        #
+        #    info(strfmt("@SYS119106", this.ItemPath));
+        #}
+      ENDSOURCE
+      SOURCE #checkOut
+        #/// <summary>
+        #///    Checks out the item.
+        #/// </summary>
+        #/// <param name="_action">
+        #///    The action being performed on the item; optional.
+        #/// </param>
+        ##SysVersionControl
+        #public void checkOut(SysVersionControlActionText _action = #MorphXActionEdit)
+        #{
+        #    SysVersionControlMorphXLockTable::create(this.ItemPath, _action);
+        #    info(strfmt("@SYS119107", this.ItemPath));
+        #}
+      ENDSOURCE
+      SOURCE #checkOutForDelete
+        #/// <summary>
+        #/// Opens the item for deletion.
+        #/// </summary>
+        #public void checkOutForDelete()
+        #{
+        ##SysVersionControl
+        #
+        #    SysVersionControlMorphXLockTable::create(this.ItemPath, #MorphXActionDelete);
+        #    info(strfmt("@SYS119117", this.ItemPath));
+        #}
+      ENDSOURCE
+      SOURCE #getItemHistory
+        #/// <summary>
+        #///    Retrieves a list of all revisions of the item.
+        #/// </summary>
+        #/// <returns>
+        #///    A temporary table that contains a record describing each revision.
+        #/// </returns>
+        #public SysVersionControlTmpItem getItemHistory()
+        #{
+        #    SysVersionControlMorphXRevisionTable revision;
+        #    SysVersionControlTmpItem item;
+        #
+        #    //
+        #    // Enumerate the revisions
+        #    //
+        #    while select ItemPath, Version, Action, Comment, CreatedBy, CreatedDateTime from revision // Use field list to avoid fetching the revision data blob.
+        #        where revision.ItemPath == this.ItemPath
+        #    {
+        #        item.clear();
+        #        item.data(revision.createItem());
+        #        item.ChangeNumber = revision.RecId;
+        #        item.insert();
+        #    }
+        #
+        #    return item;
+        #}
+      ENDSOURCE
+      SOURCE #rename
+        #/// <summary>
+        #///    Opens the item for rename.
+        #/// </summary>
+        #/// <param name="_newPath">
+        #///    The new path of the item.
+        #/// </param>
+        #/// <remarks>
+        #///    The history link is broken after the check-in of a rename.
+        #/// </remarks>
+        #public void rename(SysVersionControlItemPath _newPath)
+        #{
+        #    SysVersionControlMorphXRevisionTable revisionOld, revisionNew;
+        #
+        #    ttsbegin;
+        #    SysVersionControlMorphXItemTable::addToVersionControl(_newPath);
+        #    this.checkOutForDelete();
+        #
+        #    //
+        #    // Copy revision history to new item path
+        #    //
+        #    insert_recordset revisionNew (ItemPath, Version, Comment, Action, RevisionData)
+        #        select _newPath, Version, Comment, Action, RevisionData from revisionOld
+        #        where revisionOld.ItemPath == this.ItemPath;
+        #
+        #    ttscommit;
+        #}
+      ENDSOURCE
+      SOURCE #undoCheckOut
+        #/// <summary>
+        #///    Undoes the check-out of the item.
+        #/// </summary>
+        #public void undoCheckOut()
+        #{
+        #
+        #    ttsbegin;
+        #    SysVersionControlMorphXLockTable::remove(this.ItemPath);
+        #    ttscommit;
+        #    info(strfmt("@SYS119108", this.ItemPath));
+        #}
+      ENDSOURCE
+      SOURCE #writeItemVersionToFile
+        #/// <summary>
+        #///    Writes a version of the current item to a file.
+        #/// </summary>
+        #/// <param name="_filename">
+        #///    The name of file.
+        #/// </param>
+        #/// <param name="_version">
+        #///    The version requested.
+        #/// </param>
+        #/// <remarks>
+        #///    If the <paramref name="_version" /> parameter is 0, the most recent version is written to the file.
+        #/// </remarks>
+        #/// <exception cref="M:Exception::Error">
+        #///    If the requested version does not exist, an error is thrown.
+        #/// </exception>
+        #public void writeItemVersionToFile(Filename _filename, SysVersionControlItemVersion _version)
+        #{
+        #    SysVersionControlMorphXRevisionTable revision;
+        #
+        #    if (_version == 0) //latest version requested
+        #    {
+        #        _version = SysVersionControlMorphXRevisionTable::latestVersionNumber(this.ItemPath);
+        #    }
+        #
+        #    revision = SysVersionControlMorphXRevisionTable::find(this.ItemPath, _version);
+        #
+        #    if (revision)
+        #    {
+        #        revision.writeToFile(_filename);
+        #    }
+        #    else
+        #    {
+        #        throw error(strfmt("@SYS119109", _version, this.ItemPath));
+        #    }
+        #}
+      ENDSOURCE
+      SOURCE #addToVersionControl
+        #/// <summary>
+        #/// Adds an item to the version control system.
+        #/// </summary>
+        #/// <param name="_itemPath">
+        #/// The path of the item to add.
+        #/// </param>
+        #public static void addToVersionControl(SysVersionControlItemPath _itemPath)
+        #{
+        ##SysVersionControl
+        #
+        #    ttsbegin;
+        #    SysVersionControlMorphXItemTable::create(_itemPath);
+        #    SysVersionControlMorphXLockTable::create(_itemPath, #MorphXActionAdd);
+        #    ttscommit;
+        #    info(strfmt("@SYS119110", _itemPath));
+        #}
+      ENDSOURCE
+      SOURCE #create
+        #/// <summary>
+        #/// Creates an item record.
+        #/// </summary>
+        #/// <param name="_itemPath">
+        #/// The path of the item.
+        #/// </param>
+        #/// <returns>
+        #/// The created record.
+        #/// </returns>
+        #static private SysVersionControlMorphXItemTable create(SysVersionControlItemPath _itemPath)
+        #{
+        #    SysVersionControlMorphXItemTable item;
+        #
+        #    ttsbegin;
+        #    item.ItemPath = _itemPath;
+        #    item.insert();
+        #    ttscommit;
+        #
+        #    flush SysVersionControlMorphXItemTable;
+        #
+        #    return item;
+        #}
+      ENDSOURCE
+      SOURCE #exists
+        #public static boolean exists(SysVersionControlItemPath _itemPath)
+        #{
+        #    SysVersionControlMorphXItemTable item;
+        #
+        #    select firstonly RecId from item
+        #        where item.ItemPath == _itemPath;
+        #
+        #    return item.RecId != 0;
+        #}
+      ENDSOURCE
+      SOURCE #find
+        #public static SysVersionControlMorphXItemTable find(SysVersionControlItemPath _itemPath, boolean _forupdate = false)
+        #{
+        #    SysVersionControlMorphXItemTable item;
+        #
+        #    if (_forupdate)
+        #    {
+        #        item.selectForUpdate(true);
+        #    }
+        #
+        #    select firstonly item
+        #        where item.ItemPath == _itemPath;
+        #
+        #    return item;
+        #}
+      ENDSOURCE
+      SOURCE #removeFromVersionControl
+        #/// <summary>
+        #///    Removes an item from the version control system.
+        #/// </summary>
+        #/// <param name="_itemPath">
+        #///    The path of the item to remove from the version control system.
+        #/// </param>
+        #/// <remarks>
+        #///    This is the opposite of calling the <c>addToVersionControl</c> method.
+        #/// </remarks>
+        #public static void removeFromVersionControl(SysVersionControlItemPath _itemPath)
+        #{
+        #    SysVersionControlMorphXItemTable item;
+        #
+        #    ttsbegin;
+        #
+        #    delete_from item
+        #        where item.ItemPath == _itemPath;
+        #
+        #    flush SysVersionControlMorphXItemTable;
+        #
+        #    ttscommit;
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDTABLE
+  
+
+***Element: END
