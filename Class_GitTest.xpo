@@ -17,16 +17,17 @@ Formatversion: 1
       SOURCE #classDeclaration
         #public class GitTest
         #{
-        #
+        #    //hello word
         #}
       ENDSOURCE
       SOURCE #TestPullRequest
         #public static void TestPullRequest()
         #{
-        #    GithubSharp.Core.Models.GithubUser                                  cocytusUser;
-        #    GithubSharp.Core.API.PullRequest                                    pullApi;
-        #    GithubSharp.Plugins.LogProviders.NullLogger.NullLogger              logger;
-        #    GithubSharp.Plugins.CacheProviders.NullCacher.NullCacher            cacher;
+        #    /*
+        #    //GithubSharp.Core.Models.GithubUser                                  cocytusUser;
+        #    //GithubSharp.Core.API.PullRequest                                    pullApi;
+        #    //GithubSharp.Plugins.LogProviders.NullLogger.NullLogger              logger;
+        #    //GithubSharp.Plugins.CacheProviders.NullCacher.NullCacher            cacher;
         #
         #    List                                                                pulls;// = new ClrObject("System.Collections.Generic.IEnumerable`1[GithubSharp.Core.API.PullRequest]");
         #    CLRObject                                                           enumerator;
